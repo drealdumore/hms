@@ -1,121 +1,110 @@
+# HMS (Hostel Management System)
 
-# Node.js Boilerplate
-
-A Node.js boilerplate with security, rate limiting, data sanitization, and error handling using Express.js. This setup is ideal for building scalable and secure RESTful APIs.
+## Overview
+HMS is a web-based application designed to manage hostels, rooms, and users efficiently. It provides features for user authentication, room booking, hostel management, and email notifications.
 
 ## Features
+- **User Management**: Sign up, log in, update profile, and manage user accounts.
+- **Hostel Management**: Create, update, and delete hostels.
+- **Room Management**: Create, update, delete rooms, and manage room occupancy.
+- **Authentication**: Secure user authentication with JWT and refresh tokens.
+- **Email Notifications**: Send emails for account verification, password reset, and OTP requests.
+- **Error Handling**: Centralized error handling for API responses.
 
-- **Express** for routing
-- **Helmet** for setting security HTTP headers
-- **CORS** for Cross-Origin Resource Sharing
-- **Express-Rate-Limit** to limit repeated requests to public APIs
-- **Express-Mongo-Sanitize** to prevent NoSQL injection attacks
-- **xss-clean** to sanitize user input to prevent XSS attacks
-- **hpp** to prevent HTTP parameter pollution
-- **Error Handling** using a global error handler and custom `AppError` class
-- **Cookie Parsing** with `cookie-parser`
+## Technologies Used
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB, Mongoose
+- **Templating Engine**: Pug
+- **Email Service**: Nodemailer
+- **Security**: Helmet, express-rate-limit, xss-clean, express-mongo-sanitize
 
-## Getting Started
+## Project Structure
+```
+HMS/
+├── app.js                # Main application file
+├── server.js             # Server setup
+├── package.json          # Project dependencies and scripts
+├── controllers/          # Application controllers
+├── models/               # Mongoose models
+├── routes/               # API routes
+├── utilities/            # Utility functions and classes
+├── views/                # Email templates
+└── .gitignore            # Ignored files and folders
+```
 
-### Prerequisites
-
-Ensure you have the following installed on your local machine:
-
-- [Node.js](https://nodejs.org/en/) (v14.x or higher)
-- [npm](https://www.npmjs.com/) or [Yarn](https://yarnpkg.com/)
-
-### Installation
-
+## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/drealdumore/nodeJs-boilerplate.git
-   cd yourrepo
+   git clone <repository-url>
    ```
-
-2. Install the dependencies:
+2. Navigate to the project directory:
+   ```bash
+   cd HMS
+   ```
+3. Install dependencies:
    ```bash
    npm install
    ```
-
-3. Create a `.env` file at the root of your project and set the following environment variables:
-   ```bash
+4. Create a `.env` file in the root directory and configure the following environment variables:
+   ```env
    NODE_ENV=development
    PORT=8000
+   LOCALDB=<your-local-mongodb-uri>
+   DB=<your-production-mongodb-uri>
+   JWT_SECRET=<your-jwt-secret>
+   JWT_EXPIRES_IN=<jwt-expiration-time>
+   JWT_REFRESH_SECRET=<your-refresh-token-secret>
+   JWT_REFRESH_SECRET_EXPIRES_IN=<refresh-token-expiration-time>
+   JWT_COOKIE_EXPIRES_IN=<jwt-cookie-expiration-time>
+   JWT_REFRESH_COOKIE_EXPIRES_IN=<refresh-cookie-expiration-time>
+   GOOGLE_USERNAME=<your-gmail-username>
+   GOOGLE_PASSCODE=<your-gmail-passcode>
+   ETHEREAL_USERNAME=<your-ethereal-username>
+   ETHEREAL_PASSWORD=<your-ethereal-password>
+   FROM=<email-sender-name>
    ```
-
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-   The app should now be running at `http://localhost:8000`.
-
-### Folder Structure
-
-```bash
-.
-├── controllers
-│   └── errorController.js   # Handles global error responses
-├── appError.js              # Custom AppError class for error handling
-├── app.js                   # Express app configuration
-└── server.js                # Server entry point
-```
 
 ## Usage
+1. Start the development server:
+   ```bash
+   npm start
+   ```
+2. For production:
+   ```bash
+   npm run prod
+   ```
+3. Access the application at `http://localhost:8000`.
 
-### API Routes
+## API Endpoints
+### User Routes
+- `POST /api/users/signup`: Sign up a new user.
+- `POST /api/users/login`: Log in a user.
+- `POST /api/users/forgotPassword`: Request a password reset.
+- `PATCH /api/users/resetPassword/:token`: Reset password.
+- `POST /api/users/sendEmailVerificationCode`: Send email verification code.
+- `POST /api/users/verifyEmailCode`: Verify email code.
+- `POST /api/users/refreshToken`: Refresh access token.
 
-- **`GET /api`**: A simple test route that returns a success message.
-  
-  Example response:
-  ```json
-  {
-    "status": "success",
-    "message": "Api works👍✅✅"
-  }
-  ```
+### Admin Routes
+- `POST /api/admin/login`: Admin login.
+- `GET /api/admin/getAllUsers`: Get all active users.
+- `PATCH /api/admin/updateUser/:id`: Update user details.
+- `DELETE /api/admin/deleteUser/:id`: Delete a user.
 
-- **`GET /`**: The root route that returns a welcome message.
+### Hostel Routes
+- `POST /api/hostel/createHostel`: Create a new hostel.
+- `GET /api/hostel/getAllHostel`: Get all hostels.
+- `PATCH /api/hostel/updateHostel/:id`: Update hostel details.
+- `DELETE /api/hostel/deleteHostel/:id`: Delete a hostel.
 
-  Example response:
-  ```json
-  {
-    "status": "success",
-    "message": "Welcome to the API! 🎉"
-  }
-  ```
-
-### Error Handling
-
-- Any undefined routes will result in a `404` error response.
-  
-  Example response:
-  ```json
-  {
-    "status": "error",
-    "message": "Can't find [URL] on this server!"
-  }
-  ```
-
-### Global Error Handling
-
-The app includes a global error handler to catch all operational errors and return meaningful messages.
-
-## Scripts
-
-- **`npm run dev`**: Starts the development server with nodemon for live reloading.
-- **`npm start`**: Starts the production server.
-
-## Security
-
-This boilerplate includes several security features:
-
-- **Helmet**: Adds various security headers.
-- **Rate Limiting**: Limits the number of requests per IP to prevent brute-force attacks.
-- **MongoDB Sanitization**: Prevents NoSQL query injection by filtering request data.
-- **XSS Protection**: Cleans user input to prevent cross-site scripting attacks.
-- **HPP**: Protects against HTTP parameter pollution.
+### Room Routes
+- `POST /api/room/createRoom`: Create a new room.
+- `GET /api/room/getAllRooms`: Get all rooms.
+- `PATCH /api/room/updateRoom/:id`: Update room details.
+- `DELETE /api/room/deleteRoom/:id`: Delete a room.
 
 ## License
+This project is licensed under the ISC License.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Author
+Samuel Isah
