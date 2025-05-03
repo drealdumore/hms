@@ -10,6 +10,10 @@ import hpp from "hpp";
 import globalErrorHandler from "./controllers/errorController.js";
 import AppError from "./utilities/appError.js";
 import compression from "compression";
+import userRouter from "./routes/userRoutes.js";
+import adminRouter from "./routes/adminRoutes.js";
+import hostelRouter from "./routes/hostelRoutes.js";
+import roomRouter from "./routes/roomRoutes.js";
 
 const app = express();
 
@@ -83,6 +87,10 @@ app.use((req, res, next) => {
 });
 
 app.get("/ip", (req, res) => res.send(req.ip));
+app.use("/api/users", userRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/hostel", hostelRouter);
+app.use("/api/room", roomRouter);
 
 // HANDLE UNDEFINED ERRORS
 app.all("*", (req, res, next) => {
