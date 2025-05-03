@@ -1,0 +1,10 @@
+extends baseEmail
+
+block content
+  h1 Your OTP Request
+  p Hello #{firstName},
+  p Your OTP is: <strong>#{payload}
+  p Please use this code to complete your action. It will expire in 10 minutes.
+
+  p Best regards, 
+  p HMS Team

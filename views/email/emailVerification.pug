@@ -1,0 +1,9 @@
+extends baseEmail
+
+block content
+  p Hello #{firstName},
+  p Your email verification code is: <strong>#{payload}
+  p Please use this code to verify your email address.
+
+  p Best regards, 
+  p HMS Team
