@@ -6,6 +6,7 @@ import catchAsync from "../utilities/catchAsync.js";
 import User from "../models/userModel.js";
 import Token from "../models/tokenModel.js";
 import Email from "../utilities/email.js";
+import { validateEmailDomain } from "../utilities/validateEmailDomain.js";
 
 // Helper function to sign tokens
 const signToken = (id) => {
@@ -238,6 +239,9 @@ export const signUp = catchAsync(async (req, res, next) => {
   const trimmedFirstName = firstName.trim();
   const trimmedLastName = lastName.trim();
 
+  // Validate email domain
+  validateEmailDomain(trimmedEmail, next);
+
   // Validate email format
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
     return next(new AppError("Invalid email format!", 401));
@@ -348,14 +352,16 @@ export const createAdmin = catchAsync(async (req, res, next) => {
   const { firstName, lastName, email, password, passwordConfirm, role } =
     req.body;
 
-  // if (role && role !== "administrator" && role !== "admin") {
-  //   return next(new AppError("Invalid role specified!", 400));
-  // }
+  const trimmedEmail = email.trim();
 
+  // Validate email domain
+  validateEmailDomain(trimmedEmail, next);
+
+  // Create new admin
   const newAdmin = await User.create({
     firstName,
     lastName,
-    email,
+    email: trimmedEmail,
     password,
     passwordConfirm,
     role: !role ? "administrator" : role,
