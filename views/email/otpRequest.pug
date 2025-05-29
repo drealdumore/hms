@@ -1,10 +1,22 @@
 extends baseEmail
 
 block content
-  h1 Your OTP Request
-  p Hello #{firstName},
-  p Your OTP is: <strong>#{payload}
-  p Please use this code to complete your action. It will expire in 10 minutes.
-
-  p Best regards, 
-  p HMS Team
+  div(style="line-height:1.5;border:1px solid #ccd1d6;padding:30px;border-radius:8px")
+    p(style="margin:0;font-size:18px;font-style:normal;font-weight:500;line-height:32px;color:#010b14;margin-bottom:5px")
+      | Multi-Factor Authentication
+    p(style="font-size:16px;color:#57584e;margin:0")
+      | Please use the one-time-password (OTP) below:
+    p(style="color:#010b14;font-size:24px;font-style:normal;font-weight:600;line-height:40px;margin:24px 0")
+      | #{payload}
+    p(style="font-size:16px;color:#57584e;margin:0")
+      | The OTP will expire in 10 minutes.
+    div(style="width:100%;border-bottom:1px solid #ccd1d6;margin:24px 0")
+    p(style="font-size:16px;color:#57584e;margin:0")
+      | If you did not initiate this OTP request, we strongly advise you reset your password
+      |  immediately to secure your account and prevent unauthorized access.
+    p(style="font-size:16px;color:#57584e;margin:0;margin-top:24px") Thank you.
+    p(style="font-size:16px;color:#57584e;margin:0;margin-top:24px") Best regards, 
+    p(style="font-size:16px;color:#57584e;") HMS Team.
+    
+            
+            

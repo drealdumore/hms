@@ -65,6 +65,7 @@ const userSchema = new Schema(
     emailVerificationExpires: Date,
     emailVerificationToken: String,
   },
+  
   { timestamps: true }
 );
 

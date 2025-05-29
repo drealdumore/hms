@@ -58,16 +58,16 @@ class Email {
   async sendForgotPassword() {
     await this.sendEmail(
       "forgotPassword",
-      "Your password reset token (valid for only 10 minutes)"
+      "Password reset notification - HMS"
     );
   }
 
-  async sendOTPRequest() {
-    await this.sendEmail("otpRequest", "Your OTP Request");
+  async sendOtp() {
+    await this.sendEmail("otpRequest", "Your One Time Password");
   }
 
   async sendEmailVerificationCode() {
-    await this.sendEmail("emailVerification", "Email Verification Code");
+    await this.sendEmail("emailVerification", "Verify your HMS email");
   }
 }
 

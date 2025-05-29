@@ -8,6 +8,7 @@ const adminRouter = Router();
 
 // Admin Authentication
 adminRouter.post("/login", authController.adminSignIn);
+adminRouter.post("/verifyOtp", authController.verifyAdminOtp);
 
 // Protect all routes after this middleware
 adminRouter.use(authController.protect);
@@ -40,7 +41,7 @@ adminRouter.patch("/updateRoom/:id", roomController.updateRoom);
 adminRouter.delete("/deleteRoom/:id", roomController.deleteRoom);
 adminRouter.get("/getAllHostels", hostelController.getAllHostels);
 
-adminRouter.get("/getRoomStatus/:id", roomController.getRoomStatus); 
-adminRouter.get("/getOccupants/:id", roomController.getOccupants);   
+adminRouter.get("/getRoomStatus/:id", roomController.getRoomStatus);
+adminRouter.get("/getOccupants/:id", roomController.getOccupants);
 
 export default adminRouter;

@@ -198,16 +198,7 @@ export const verifyEmailCode = catchAsync(async (req, res, next) => {
     return next(new AppError("No user found with this email address!", 404));
   }
 
-  // 2) Hash the provided code and compare it with the stored hashed code
-  // const hashedCode = crypto.createHash("sha256").update(code).digest("hex");
-
-  // if (
-  //   hashedCode !== user.emailVerificationCode ||
-  //   user.emailVerificationExpires < Date.now()
-  // ) {
-  //   return next(new AppError("Invalid or expired verification code!", 400));
-  // }
-
+  // 2) Validate the code
   if (
     code !== user.emailVerificationCode ||
     user.emailVerificationExpires < Date.now()
@@ -222,14 +213,26 @@ export const verifyEmailCode = catchAsync(async (req, res, next) => {
 
   await user.save({ validateBeforeSave: false });
 
-  res.status(200).json({
-    status: "success",
-    message: "Email verified successfully!",
-  });
+  try {
+    // Send welcome email
+    const payload = `${req.protocol}://${req.get("host")}/me`;
+    const sendEmail = new Email(user, payload);
+    await sendEmail.sendWelcomeEmail();
+
+    res.status(200).json({
+      status: "success",
+      message: "Email verified successfully! Welcome email sent!",
+    });
+  } catch (error) {
+    return next(new AppError("Failed to send welcome email!", 500));
+  }
 });
 
 export const signUp = catchAsync(async (req, res, next) => {
+  console.log("SignUp function called");
   const { firstName, lastName, email, password, passwordConfirm } = req.body;
+
+  console.log(req.body);
 
   if (!firstName || !lastName || !email || !password || !passwordConfirm) {
     return next(new AppError("All fields are required!", 400));
@@ -238,9 +241,6 @@ export const signUp = catchAsync(async (req, res, next) => {
   const trimmedEmail = email.trim();
   const trimmedFirstName = firstName.trim();
   const trimmedLastName = lastName.trim();
-
-  // Validate email domain
-  validateEmailDomain(trimmedEmail, next);
 
   // Validate email format
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
@@ -254,6 +254,9 @@ export const signUp = catchAsync(async (req, res, next) => {
   if (!/^[a-zA-Z0-9 -]+$/.test(trimmedLastName)) {
     return next(new AppError("Invalid last name!", 401));
   }
+
+  // Validate email domain
+  validateEmailDomain(trimmedEmail, next);
 
   // Validate password strength
   if (
@@ -272,11 +275,17 @@ export const signUp = catchAsync(async (req, res, next) => {
   // Check if user already exists
   const existingUser = await User.findOne({ email });
 
+  console.log("checking if user exist✅✅✅");
+
+  console.log("Existing user:", existingUser);
+
   if (existingUser) {
     return next(
       new AppError("User with this email address already exists!", 401)
     );
   }
+
+  console.log("creating new user exist✅✅✅");
 
   // Create new user
   const newUser = await User.create({
@@ -287,15 +296,25 @@ export const signUp = catchAsync(async (req, res, next) => {
     passwordConfirm,
   });
 
+  console.log("new user created✅✅✅");
+
   try {
-    const payload = `${req.protocol}://${req.get("host")}/me`;
-    const sendEmail = new Email(newUser, payload);
+    // Generate a random 6-digit code
+    const verificationCode = newUser.createEmailVerificationCode();
+    await newUser.save({ validateBeforeSave: false });
+    console.log(verificationCode)
 
-    await sendEmail.sendWelcomeEmail();
+    // Send the verification code via email
+    const sendEmail = new Email(newUser, verificationCode);
+    await sendEmail.sendEmailVerificationCode();
 
-    // Send tokens
-    await createAndSendTokens(newUser, 201, req, res);
+    res.status(201).json({
+      status: "success",
+      verificationCode,
+      message: "Verification code sent to email successfully!",
+    });
   } catch (error) {
+    console.log(error)
     return next(new AppError("Failed to send verification email!", 500));
   }
 });
@@ -344,7 +363,54 @@ export const adminSignIn = catchAsync(async (req, res, next) => {
     return next(new AppError("Access denied! Only admins are allowed.", 403));
   }
 
-  // 4) Send token to client
+  // 4) Generate a 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  admin.emailVerificationCode = otp;
+  admin.emailVerificationExpires = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+  await admin.save({ validateBeforeSave: false });
+
+  // 5) Send OTP to admin's email
+  try {
+    const sendEmail = new Email(admin, otp);
+    await sendEmail.sendOtp();
+
+    res.status(200).json({
+      status: "success",
+      message: "OTP sent to your email. Please verify to proceed.",
+    });
+  } catch (error) {
+    admin.emailVerificationCode = undefined;
+    admin.emailVerificationExpires = undefined;
+    await admin.save({ validateBeforeSave: false });
+
+    return next(new AppError("Failed to send OTP email!", 500));
+  }
+});
+
+export const verifyAdminOtp = catchAsync(async (req, res, next) => {
+  const { email, otp } = req.body;
+
+  // 1) Find the admin by email
+  const admin = await User.findOne({ email });
+
+  if (!admin) {
+    return next(new AppError("No admin found with this email address!", 404));
+  }
+
+  // 2) Validate OTP
+  if (
+    otp !== admin.emailVerificationCode ||
+    admin.emailVerificationExpires < Date.now()
+  ) {
+    return next(new AppError("Invalid or expired OTP!", 400));
+  }
+
+  // 3) Clear OTP fields and log the admin in
+  admin.emailVerificationCode = undefined;
+  admin.emailVerificationExpires = undefined;
+  await admin.save({ validateBeforeSave: false });
+
+  // 4) Send tokens
   await createAndSendTokens(admin, 200, req, res);
 });
 
@@ -619,3 +685,7 @@ export const protectVerified = catchAsync(async (req, res, next) => {
   }
   next();
 });
+
+
+
+// TODO:: --- is there a way to like do this code cos somtimes email verifiation email may not work but user is already created and when user tries to create acct again with their email they see that email is already used. is there a way to fix that so that if email doesnt send, user shouldnt exist too

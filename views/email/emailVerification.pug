@@ -1,9 +1,15 @@
 extends baseEmail
 
 block content
-  p Hello #{firstName},
-  p Your email verification code is: <strong>#{payload}
-  p Please use this code to verify your email address.
+  div(style="padding:60px 30px 30px 30px;border:1px solid #ccd1d6;border-radius:8px")
+    p(style="font-size:18px;margin-bottom:30px") Hello #{firstName},
+    p(style="font-size:16px;margin-bottom:10px") Thanks for signing up with HMS! Before you get started with HMS, we need you to confirm your email address. Please click the button below to complete your signup.
+    div(style="margin:30px 0")
+      a(
+        href=`${payload}`, target='_blank',
+        style="display:inline-block;width:100%;line-height:36px;text-align:center;background-color:#080a0bde;color:#fff;border-radius:5px;text-decoration:none;font-weight:bold;font-size:13px"
+      ) Confirm Email Address
+    p(style="font-size:16px;margin-bottom:10px")
+      | If you have any trouble clicking the button above, please copy and paste the URL below into your web browser.
+      a(href=`${payload}`, target='_blank' style="color:#006ed1") #{payload}
 
-  p Best regards, 
-  p HMS Team
